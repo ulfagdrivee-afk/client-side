@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Peta Interaktif</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="map-container">
+
+  <!-- PETA -->
+   <div id="map-content">
+  <img id="map" src="indonesia.svg" alt="Peta">
+    <!-- SVG UNTUK GARIS KONEKSI -->
+  <svg id="line-layer"></svg>
+    </div>
+
+
+
+  <!-- POPUP TAMBAH LOKASI -->
+  <div id="popup" class="hidden">
+    <input type="text" id="locationName" placeholder="Nama lokasi..." />
+    <button id="saveBtn">Enter</button>
+     <button id="cancelBtn">Batal</button>
+  </div>
+
+  <!-- POPUP KONEKSI -->
+<div id="connectPopup" class="hidden">
+  <h4>Koneksi Lokasi</h4>
+
+  <input type="number" id="distanceInput" placeholder="Jarak (km)" />
+
+  <select id="transportSelect">
+    <option value="train">Kereta Api</option>
+    <option value="bus">Bus</option>
+    <option value="plane">Pesawat</option>
+  </select>
+
+  <button id="connectSaveBtn">Sambungkan</button>
+  <button id="connectCancelBtn">Batal</button>
+</div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

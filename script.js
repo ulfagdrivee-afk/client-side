@@ -89,12 +89,31 @@ function renderPin(pin) {
   div.style.top = pin.y + "%";
   div.dataset.id = pin.id;
 
-  div.innerHTML = `
-    <div class="pin-icon">📍</div>
-    <div class="pin-label">${pin.name}</div>
-    <button onclick="connectPin(${pin.id})">Hubungkan</button>
-    <button onclick="deletePin(${pin.id})">Hapus</button>
-  `;
+ div.innerHTML = `
+  <div class="pin-icon">📍</div>
+
+  <div class="pin-label">
+    ${pin.name}
+
+    <div class="pin-actions">
+
+      <img
+        src="MdiTrashCanOutline.svg"
+        class="action-icon"
+        title="Hubungkan"
+        onclick="connectPin(${pin.id})"
+      >
+
+      <img
+        src="images/delete.png"
+        class="action-icon"
+        title="Hapus"
+        onclick="deletePin(${pin.id})"
+      >
+
+    </div>
+  </div>
+`;
 
   // 🔥 PENTING: masuk ke map-content (bukan container)
   document.getElementById("map-content").appendChild(div);

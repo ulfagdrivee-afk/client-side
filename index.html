@@ -9,42 +9,92 @@
 </head>
 <body>
 
+<body>
+
 <div id="map-container">
 
+  <div id="route-panel">
+
+  <h2>Temukan Rute</h2>
+
+  <input
+    type="text"
+    id="fromInput"
+    placeholder="Dari pinpoint"
+  >
+
+  <input
+    type="text"
+    id="toInput"
+    placeholder="Ke pinpoint"
+  >
+
+  <select id="sortType">
+    <option value="fastest">
+      Tercepat
+    </option>
+
+    <option value="cheapest">
+      Termurah
+    </option>
+  </select>
+
+  <button
+    id="searchRouteBtn"
+    disabled
+  >
+    Cari Rute
+  </button>
+
+  <div id="routeResults"></div>
+
+</div>
+
   <!-- PETA -->
-   <div id="map-content">
-  <img id="map" src="indonesia.svg" alt="Peta">
-    <!-- SVG UNTUK GARIS KONEKSI -->
-  <svg id="line-layer"></svg>
-    </div>
+  <div id="map-content">
 
+    <img
+      id="map"
+      src="indonesia.svg"
+      alt="Peta Indonesia"
+    >
 
+    <svg id="line-layer"></svg>
 
-  <!-- POPUP TAMBAH LOKASI -->
+  </div>
+
+  <!-- POPUP -->
   <div id="popup" class="hidden">
     <input type="text" id="locationName" placeholder="Nama lokasi..." />
     <button id="saveBtn">Enter</button>
-     <button id="cancelBtn">Batal</button>
+    <button id="cancelBtn">Batal</button>
   </div>
 
-  <!-- POPUP KONEKSI -->
-<div id="connectPopup" class="hidden">
-  <h4>Koneksi Lokasi</h4>
+  <!-- CONNECT -->
+  <div id="connectPopup" class="hidden">
 
-  <input type="number" id="distanceInput" placeholder="Jarak (km)" />
+    <h4>Koneksi Lokasi</h4>
 
-  <select id="transportSelect">
-    <option value="train">Kereta Api</option>
-    <option value="bus">Bus</option>
-    <option value="plane">Pesawat</option>
-  </select>
+    <input
+      type="number"
+      id="distanceInput"
+      placeholder="Jarak (km)"
+    />
 
-  <button id="connectSaveBtn">Sambungkan</button>
-  <button id="connectCancelBtn">Batal</button>
-</div>
+    <select id="transportSelect">
+      <option value="train">Kereta Api</option>
+      <option value="bus">Bus</option>
+      <option value="plane">Pesawat</option>
+    </select>
+
+    <button id="connectSaveBtn">Sambungkan</button>
+    <button id="connectCancelBtn">Batal</button>
+
+  </div>
 
 </div>
 
 <script src="script.js"></script>
 </body>
+
 </html>

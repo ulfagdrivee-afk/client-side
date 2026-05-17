@@ -12,6 +12,8 @@ const connectSaveBtn = document.getElementById("connectSaveBtn");
 const connectCancelBtn = document.getElementById("connectCancelBtn");
 
 let connectFrom = null;
+let selectedConnection = null;
+
 let tempX = 0;
 let tempY = 0;
 
@@ -102,15 +104,30 @@ function renderPin(pin) {
    DELETE PIN
 ====================== */
 function deletePin(id) {
+
+  // hapus pin
   pins = pins.filter(p => p.id != id);
+
+  // hapus semua koneksi menuju pin ini
+  pins.forEach(pin => {
+
+    pin.connections =
+      (pin.connections || []).filter(
+        conn => conn.to != id
+      );
+  });
+
   save();
 
-  const el = document.querySelector(`[data-id='${id}']`);
+  const el =
+    document.querySelector(
+      `[data-id='${id}']`
+    );
+
   if (el) el.remove();
 
   drawLines();
 }
-
 /* ======================
    CONNECT MODE
 ====================== */
@@ -145,11 +162,20 @@ mapContainer.addEventListener("click", (e) => {
     const distance = parseFloat(distanceInput.value) || 0;
     const type = transportSelect.value;
 
-    fromPin.connections.push({
-      to: toPin.id,
-      distance,
-      type
-    });
+  fromPin.connections.push({
+  to: toPin.id,
+  distance,
+  type
+});
+
+// koneksi balik
+toPin.connections.push({
+  to: fromPin.id,
+  distance,
+  type
+});
+
+localStorage.clear();
 
     save();
 
@@ -212,6 +238,24 @@ function drawLines() {
       line.setAttribute("stroke", color);
       line.setAttribute("stroke-width", "3");
 
+      line.style.cursor = "pointer";
+
+line.addEventListener("click", () => {
+
+  // reset semua garis
+  svg.querySelectorAll("line").forEach(l => {
+    l.setAttribute("stroke-width", "3");
+  });
+
+  // garis aktif
+  line.setAttribute("stroke-width", "6");
+
+  selectedConnection = {
+    fromId: from.id,
+    toId: conn.to
+  };
+});
+
       svg.appendChild(line);
 
       // label
@@ -235,7 +279,8 @@ function drawLines() {
       svg.appendChild(text);
     });
   });
-}/* ======================
+}
+/* ======================
    SAVE LOCAL STORAGE
 ====================== */
 function save() {
@@ -243,7 +288,7 @@ function save() {
 }
 
 
-const container = document.getElementById("map-container");
+const container = document.getElementById("map-content");
 const content = document.getElementById("map-content");
 
 let scale = 1;
@@ -364,3 +409,279 @@ function updateTransform() {
 }
 
 updateTransform();
+
+const fromInput = document.getElementById("fromInput");
+const toInput = document.getElementById("toInput");
+
+const searchRouteBtn =
+  document.getElementById("searchRouteBtn");
+
+const routeResults =
+  document.getElementById("routeResults");
+
+const sortType =
+  document.getElementById("sortType");
+
+/* =========================
+   VALIDASI INPUT
+========================= */
+
+function validateRouteInputs() {
+
+  const fromExists = pins.some(
+    p => p.name.toLowerCase() ===
+    fromInput.value.toLowerCase()
+  );
+
+  const toExists = pins.some(
+    p => p.name.toLowerCase() ===
+    toInput.value.toLowerCase()
+  );
+
+  searchRouteBtn.disabled =
+    !(fromExists && toExists);
+}
+
+fromInput.addEventListener(
+  "input",
+  validateRouteInputs
+);
+
+toInput.addEventListener(
+  "input",
+  validateRouteInputs
+);
+
+
+searchRouteBtn.addEventListener("click", () => {
+
+  routeResults.innerHTML = "";
+
+  const fromName = fromInput.value.toLowerCase();
+  const toName = toInput.value.toLowerCase();
+
+  const fromPin = pins.find(
+    p => p.name.toLowerCase() === fromName
+  );
+
+  const toPin = pins.find(
+    p => p.name.toLowerCase() === toName
+  );
+
+  if (!fromPin || !toPin) {
+    routeResults.innerHTML = "Lokasi tidak ditemukan";
+    return;
+  }
+
+  // ======================
+  // DIJKSTRA SEDERHANA
+  // ======================
+
+  let distances = {};
+  let previous = {};
+  let visited = [];
+
+  pins.forEach(pin => {
+    distances[pin.id] = Infinity;
+    previous[pin.id] = null;
+  });
+
+  distances[fromPin.id] = 0;
+
+  while (visited.length < pins.length) {
+
+    let current = null;
+
+    pins.forEach(pin => {
+      if (
+        !visited.includes(pin.id) &&
+        (
+          current === null ||
+          distances[pin.id] < distances[current]
+        )
+      ) {
+        current = pin.id;
+      }
+    });
+
+    if (current === null) break;
+
+    visited.push(current);
+
+    const currentPin =
+  pins.find(p => p.id == current);
+
+(currentPin.connections || []).forEach(conn => {
+
+  const newDistance =
+    distances[current] + conn.distance;
+
+  if (newDistance < distances[conn.to]) {
+
+    distances[conn.to] = newDistance;
+
+    previous[conn.to] = {
+      from: current,
+      type: conn.type,
+      distance: conn.distance
+    };
+  }
+});
+  }
+
+  // ======================
+  // BANGUN RUTE
+  // ======================
+
+  let path = [];
+  let current = toPin.id;
+
+  while (current !== fromPin.id) {
+
+    const prev = previous[current];
+
+    if (!prev) {
+      routeResults.innerHTML =
+        "Rute tidak ditemukan";
+      return;
+    }
+
+    path.unshift({
+      from: prev.from,
+      to: current,
+      type: prev.type,
+      distance: prev.distance
+    });
+
+    current = prev.from;
+  }
+
+  // ======================
+  // HITUNG TOTAL
+  // ======================
+
+  let totalDistance = 0;
+  let totalDuration = 0;
+  let totalCost = 0;
+
+  let steps = [];
+
+  path.forEach(step => {
+
+    const from =
+      pins.find(p => p.id == step.from);
+
+    const to =
+      pins.find(p => p.id == step.to);
+
+    totalDistance += step.distance;
+
+    const speed =
+      step.type === "plane"
+      ? 800
+      : step.type === "train"
+      ? 120
+      : 60;
+
+    const duration =
+      (step.distance / speed) * 60;
+
+    totalDuration += duration;
+
+    const cost =
+      step.distance *
+      (
+        step.type === "plane"
+        ? 5
+        : step.type === "train"
+        ? 2
+        : 1
+      );
+
+    totalCost += cost;
+
+    steps.push(
+      `${from.name} → ${to.name}
+       (${step.type} ${step.distance} km)`
+    );
+  });
+
+  // ======================
+  // TAMPILKAN
+  // ======================
+
+  const div = document.createElement("div");
+
+  div.className = "route-card";
+
+  div.innerHTML = `
+    <div class="route-title">
+      ${fromPin.name} → ${toPin.name}
+    </div>
+
+    <div class="route-info">
+      📏 Jarak:
+      ${totalDistance} km
+    </div>
+
+    <div class="route-info">
+      ⏱ Durasi:
+      ${totalDuration.toFixed(1)} menit
+    </div>
+
+    <div class="route-info">
+      💰 Total Biaya:
+      Rp ${totalCost.toFixed(0)}
+    </div>
+
+    <div class="route-step">
+      ${steps.join("<br>")}
+    </div>
+  `;
+
+  routeResults.appendChild(div);
+
+});
+
+
+window.addEventListener("keydown", (e) => {
+
+  if (
+    e.key !== "Delete" &&
+    e.key !== "Backspace"
+  ) return;
+
+  if (!selectedConnection) return;
+
+  const fromPin =
+    pins.find(
+      p => p.id == selectedConnection.fromId
+    );
+
+  if (!fromPin) return;
+
+  fromPin.connections =
+    (fromPin.connections || []).filter(
+      conn => conn.to != selectedConnection.toId
+    );
+
+  // hapus koneksi balik juga
+  const toPin =
+    pins.find(
+      p => p.id == selectedConnection.toId
+    );
+
+  if (toPin) {
+
+    toPin.connections =
+      (toPin.connections || []).filter(
+        conn => conn.to != selectedConnection.fromId
+      );
+  }
+
+  selectedConnection = null;
+
+  save();
+
+  drawLines();
+});

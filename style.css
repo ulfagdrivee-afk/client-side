@@ -37,7 +37,6 @@ html, body {
   transform-origin: 0 0;
   will-change: transform;
 }
-
 /* layer garis koneksi */
 #line-layer {
   position: absolute;
@@ -123,4 +122,122 @@ html, body {
   font-size: 12px;
   fill: black;
   font-weight: bold;
+}
+#route-panel {
+  position: fixed;
+
+  top: 20px;
+  left: 20px;
+
+  width: 320px;
+  max-height: 92vh;
+
+  background: rgba(255,255,255,0.92);
+
+  backdrop-filter: blur(10px);
+
+  border-radius: 18px;
+
+  padding: 18px;
+
+  z-index: 9999;
+
+  overflow-y: auto;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.25);
+
+  border:
+    1px solid rgba(255,255,255,0.3);
+}
+
+#route-panel h2 {
+  margin-bottom: 15px;
+
+  font-size: 24px;
+
+  color: #222;
+}
+
+#route-panel input,
+#route-panel select {
+  width: 100%;
+
+  padding: 12px;
+
+  margin-top: 10px;
+
+  border-radius: 10px;
+
+  border: 1px solid #ccc;
+
+  outline: none;
+
+  font-size: 14px;
+}
+
+#searchRouteBtn {
+  width: 100%;
+
+  padding: 12px;
+
+  margin-top: 15px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+#searchRouteBtn:hover {
+  transform: scale(1.02);
+}
+
+#searchRouteBtn:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
+
+.route-card {
+  margin-top: 15px;
+
+  padding: 15px;
+
+  border-radius: 12px;
+
+  background: white;
+
+  box-shadow:
+    0 2px 10px rgba(0,0,0,0.1);
+}
+
+.route-title {
+  font-size: 18px;
+  color: #222;
+  font-weight: bold;
+}
+
+.route-info {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #444;
+}
+
+.route-step {
+  margin-top: 10px;
+padding-top: 10px;
+border-top: 1px solid #ddd;
+  padding-left: 10px;
+font-size: 13px;
+line-height: 1.5;
+  /* border-left: 3px solid #2563eb; */
 }

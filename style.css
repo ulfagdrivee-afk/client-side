@@ -1,128 +1,326 @@
+/* =========================
+   RESET
+========================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
+/* =========================
+   MAP CONTAINER
+========================= */
 #map-container {
   width: 100vw;
   height: 100vh;
   position: relative;
   overflow: hidden;
-  cursor: grab;
   background: #000;
+  cursor: grab;
 }
 
-/* peta full layar */
-#map {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-
+/* =========================
+   MAP CONTENT
+========================= */
 #map-content {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   transform-origin: 0 0;
   will-change: transform;
 }
-/* layer garis koneksi */
-#line-layer {
+
+/* =========================
+   MAP IMAGE
+========================= */
+#map {
   position: absolute;
-  top: 0;
-  left: 0;
   inset: 0;
-  left: 0;
+
   width: 100%;
   height: 100%;
+
+  object-fit: cover;
+
   pointer-events: none;
-  /* z-index: 2; */
+  user-select: none;
 }
 
-
-
-/* PIN */
-.pin {
+/* =========================
+   LINE SVG
+========================= */
+#line-layer {
   position: absolute;
-  transform: translate(-50%, -100%);
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 2;
+
+  overflow: visible;
+}
+
+#line-layer line {
   cursor: pointer;
-  text-align: center;
-  z-index: 3;
+  transition: 0.2s;
 }
 
-.pin-icon {
-  font-size: 24px;
-  color: red;
-}
-
-.pin-label {
-  font-size: 12px;
-  background: white;
-  padding: 2px 4px;
-  border-radius: 4px;
-}
-
-/* POPUP */
-#popup {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-}
-
-.hidden {
-  display: none;
-}
-
-#popup button {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-
-#cancelBtn {
-  background: red;
-  color: white;
-  border: none;
-}
-
-#saveBtn {
-  background: green;
-  color: white;
-  border: none;
-}
-
-
-#connectPopup {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  z-index: 999;
+#line-layer line:hover {
+  stroke-width: 5;
 }
 
 .line-label {
   font-size: 12px;
-  fill: black;
+  font-weight: bold;
+  fill: #111;
+  user-select: none;
+}
+
+/* =========================
+   PIN
+========================= */
+.pin {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 5;
+  user-select: none;
+}
+
+/* PIN ICON */
+.pin-icon {
+  width: 70px;
+  height: 70px;
+
+  background: #ff0000;
+
+  border-radius: 50% 50% 50% 0;
+
+  transform: rotate(-45deg);
+
+  position: relative;
+
+  box-shadow:
+    0 6px 15px rgba(0,0,0,0.25);
+}
+
+/* LUBANG TENGAH */
+.pin-icon::after {
+  content: "";
+
+  position: absolute;
+
+  width: 26px;
+  height: 26px;
+
+  top: 22px;
+  left: 22px;
+
+  border-radius: 50%;
+
+  background: #b7d9ef;
+}
+
+/* LABEL */
+.pin-label {
+  margin-top: 10px;
+
+  min-width: 120px;
+
+  background: white;
+
+  padding: 10px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow:
+    0 3px 10px rgba(0,0,0,0.2);
+}
+
+/* ACTIONS */
+.pin-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+
+  margin-top: 8px;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.action-icon:hover {
+  transform: scale(1.15);
+}
+
+/* =========================
+   POPUP
+========================= */
+#popup {
+  position: fixed;
+
+  width: 260px;
+
+  background: #f5f5f5;
+
+  border: 5px solid black;
+
+  border-radius: 18px;
+
+  padding: 14px;
+
+  z-index: 99999;
+
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.25);
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* HEADER */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* TITLE */
+.popup-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #111;
+}
+
+/* CLOSE BUTTON */
+.popup-close {
+  background: transparent;
+  border: none;
+
+  color: red;
+
+  font-size: 24px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+/* INPUT */
+#locationName {
+  width: 100%;
+
+  padding: 10px 14px;
+
+  border-radius: 14px;
+
+  border: 3px solid #444;
+
+  outline: none;
+
+  font-size: 14px;
+
+  background: white;
+}
+
+#locationName:focus {
+  border-color: #2563eb;
+}
+
+/* =========================
+   CONNECT POPUP
+========================= */
+#connectPopup {
+  position: fixed;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 280px;
+
+  background: white;
+
+  padding: 18px;
+
+  border-radius: 16px;
+
+  z-index: 99999;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.25);
+}
+
+#connectPopup h4 {
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+#connectPopup input,
+#connectPopup select {
+  width: 100%;
+
+  margin-top: 10px;
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  border: 1px solid #ccc;
+
+  outline: none;
+}
+
+#connectPopup button {
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding: 10px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
   font-weight: bold;
 }
+
+#connectSaveBtn {
+  background: #2563eb;
+  color: white;
+}
+
+#connectCancelBtn {
+  background: #ef4444;
+  color: white;
+}
+
+/* =========================
+   ROUTE PANEL
+========================= */
 #route-panel {
   position: fixed;
 
@@ -132,42 +330,40 @@ html, body {
   width: 320px;
   max-height: 92vh;
 
+  overflow-y: auto;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
   background: rgba(255,255,255,0.92);
 
   backdrop-filter: blur(10px);
 
-  border-radius: 18px;
-
-  padding: 18px;
-
   z-index: 9999;
-
-  overflow-y: auto;
 
   box-shadow:
     0 10px 30px rgba(0,0,0,0.25);
-
-  border:
-    1px solid rgba(255,255,255,0.3);
 }
 
+/* TITLE */
 #route-panel h2 {
   margin-bottom: 15px;
 
   font-size: 24px;
-
   color: #222;
 }
 
+/* INPUT */
 #route-panel input,
 #route-panel select {
   width: 100%;
 
-  padding: 12px;
-
   margin-top: 10px;
 
-  border-radius: 10px;
+  padding: 12px;
+
+  border-radius: 12px;
 
   border: 1px solid #ccc;
 
@@ -176,16 +372,17 @@ html, body {
   font-size: 14px;
 }
 
+/* BUTTON */
 #searchRouteBtn {
   width: 100%;
 
-  padding: 12px;
-
   margin-top: 15px;
+
+  padding: 12px;
 
   border: none;
 
-  border-radius: 10px;
+  border-radius: 12px;
 
   background: #2563eb;
 
@@ -207,12 +404,15 @@ html, body {
   cursor: not-allowed;
 }
 
+/* =========================
+   ROUTE CARD
+========================= */
 .route-card {
   margin-top: 15px;
 
   padding: 15px;
 
-  border-radius: 12px;
+  border-radius: 14px;
 
   background: white;
 
@@ -222,22 +422,31 @@ html, body {
 
 .route-title {
   font-size: 18px;
-  color: #222;
   font-weight: bold;
+  color: #222;
 }
 
 .route-info {
-  margin-top: 5px;
+  margin-top: 6px;
+
   font-size: 14px;
   color: #444;
 }
 
 .route-step {
-  margin-top: 10px;
-padding-top: 10px;
-border-top: 1px solid #ddd;
-  padding-left: 10px;
-font-size: 13px;
-line-height: 1.5;
-  /* border-left: 3px solid #2563eb; */
+  margin-top: 12px;
+
+  padding-top: 10px;
+
+  border-top: 1px solid #ddd;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* =========================
+   UTIL
+========================= */
+.hidden {
+  display: none !important;
 }

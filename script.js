@@ -1,7 +1,6 @@
 const mapContainer = document.getElementById("map-container");
 const popup = document.getElementById("popup");
 const input = document.getElementById("locationName");
-const saveBtn = document.getElementById("saveBtn");
 const svg = document.getElementById("line-layer");
 const cancelBtn = document.getElementById("cancelBtn");
 
@@ -13,6 +12,9 @@ const connectCancelBtn = document.getElementById("connectCancelBtn");
 
 let connectFrom = null;
 let selectedConnection = null;
+
+let popupX = 0;
+let popupY = 0;
 
 let tempX = 0;
 let tempY = 0;
@@ -36,26 +38,92 @@ window.onload = () => {
 /* ======================
    DOUBLE CLICK TAMBAH PIN
 ====================== */
+ popup.classList.add("hidden");
 mapContainer.addEventListener("dblclick", (e) => {
-  const rect = mapContainer.getBoundingClientRect();
 
-  tempX = ((e.clientX - rect.left) / rect.width) * 100;
-  tempY = ((e.clientY - rect.top) / rect.height) * 100;
+  const rect =
+    mapContainer.getBoundingClientRect();
+
+  tempX =
+    ((e.clientX - rect.left) / rect.width) * 100;
+
+  tempY =
+    ((e.clientY - rect.top) / rect.height) * 100;
 
   popup.classList.remove("hidden");
+
   input.value = "";
+
+  // posisi popup dekat klik
+  let popupX = e.clientX + 10;
+  let popupY = e.clientY - 20;
+
+  const popupWidth = 260;
+  const popupHeight = 140;
+  const margin = 20;
+
+  // kanan
+  if (
+    popupX + popupWidth >
+    window.innerWidth - margin
+  ) {
+    popupX =
+      window.innerWidth - popupWidth - margin;
+  }
+
+  // bawah
+  if (
+    popupY + popupHeight >
+    window.innerHeight - margin
+  ) {
+    popupY =
+      window.innerHeight - popupHeight - margin;
+  }
+
+  // kiri
+  if (popupX < margin) {
+    popupX = margin;
+  }
+
+  // atas
+  if (popupY < margin) {
+    popupY = margin;
+  }
+
+  popup.style.left = popupX + "px";
+  popup.style.top = popupY + "px";
+
+  popup.style.transform = "none";
+
   input.focus();
 });
+/* ENTER INPUT */
+input.addEventListener("keypress", (e) => {
 
+  if (e.key === "Enter") {
+
+    savePin();
+
+    popup.classList.add("hidden");
+  }
+});
+
+/* CLOSE */
+cancelBtn.onclick = () => {
+  popup.classList.add("hidden");
+};
 /* ======================
    SAVE PIN
 ====================== */
-saveBtn.onclick = savePin;
 
 input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") savePin();
+
+  if (e.key === "Enter") {
+    savePin();
+  }
 });
 
+/* CLOSE */
 cancelBtn.onclick = () => {
   popup.classList.add("hidden");
 };
@@ -83,42 +151,47 @@ function savePin() {
    RENDER PIN
 ====================== */
 function renderPin(pin) {
+
   const div = document.createElement("div");
+
   div.className = "pin";
+
   div.style.left = pin.x + "%";
   div.style.top = pin.y + "%";
+
   div.dataset.id = pin.id;
 
- div.innerHTML = `
-  <div class="pin-icon">📍</div>
+  div.innerHTML = `
 
-  <div class="pin-label">
-    ${pin.name}
+    <div class="pin-icon"></div>
 
-    <div class="pin-actions">
+    <div class="pin-label">
 
-      <img
-        src="MdiTrashCanOutline.svg"
-        class="action-icon"
-        title="Hubungkan"
-        onclick="connectPin(${pin.id})"
-      >
+      ${pin.name}
 
-      <img
-        src="images/delete.png"
-        class="action-icon"
-        title="Hapus"
-        onclick="deletePin(${pin.id})"
-      >
+      <div class="pin-actions">
+
+        <img
+          src="MdiTransitConnectionVariant.svg"
+          class="action-icon"
+          onclick="connectPin(${pin.id})"
+        >
+
+        <img
+          src="MdiTrashCanOutline.svg"
+          class="action-icon"
+          onclick="deletePin(${pin.id})"
+        >
+
+      </div>
 
     </div>
-  </div>
-`;
+  `;
 
-  // 🔥 PENTING: masuk ke map-content (bukan container)
-  document.getElementById("map-content").appendChild(div);
+  document
+    .getElementById("map-content")
+    .appendChild(div);
 }
-
 /* ======================
    DELETE PIN
 ====================== */
@@ -194,7 +267,6 @@ toPin.connections.push({
   type
 });
 
-localStorage.clear();
 
     save();
 
@@ -214,86 +286,123 @@ localStorage.clear();
    DRAW LINES (FIX UTAMA)
 ====================== */
 function drawLines() {
+
   svg.innerHTML = "";
 
+  const drawn = new Set();
+
   pins.forEach(from => {
+
     if (!Array.isArray(from.connections)) return;
 
-    from.connections.forEach((conn, index) => {
-      const to = pins.find(p => p.id == conn.to);
+    from.connections.forEach(conn => {
+
+     const key =
+  [from.id, conn.to]
+  .sort()
+  .join("-") + "-" + conn.type;
+
+      // hanya gambar sekali
+      if (drawn.has(key)) return;
+
+      drawn.add(key);
+
+      const to =
+        pins.find(p => p.id == conn.to);
+
       if (!to) return;
 
-      const dx = to.x - from.x;
-      const dy = to.y - from.y;
+      const color =
+        transportData[conn.type]?.color || "blue";
 
-      const length = Math.sqrt(dx * dx + dy * dy) || 1;
-
-      // offset agar garis tidak bertumpuk
-      const offset = (index - from.connections.length / 2) * 1.5;
-
-      const perpX = -dy / length;
-      const perpY = dx / length;
-
-      // tetap persen
-      const x1 = from.x + perpX * offset;
-      const y1 = from.y + perpY * offset;
-
-      const x2 = to.x + perpX * offset;
-      const y2 = to.y + perpY * offset;
-
-      const color = transportData[conn.type]?.color || "blue";
-
-      // garis
+      // GARIS
       const line = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "line"
       );
 
-      line.setAttribute("x1", x1 + "%");
-      line.setAttribute("y1", y1 + "%");
-      line.setAttribute("x2", x2 + "%");
-      line.setAttribute("y2", y2 + "%");
+    const dx = to.x - from.x;
+const dy = to.y - from.y;
+
+const length =
+  Math.sqrt(dx * dx + dy * dy) || 1;
+
+let offset = 0;
+
+if (conn.type === "train") {
+  offset = -1.2;
+}
+
+if (conn.type === "bus") {
+  offset = 0;
+}
+
+if (conn.type === "plane") {
+  offset = 1.2;
+}
+
+const perpX = -dy / length;
+const perpY = dx / length;
+
+const x1 =
+  from.x + perpX * offset;
+
+const y1 =
+  from.y + perpY * offset;
+
+const x2 =
+  to.x + perpX * offset;
+
+const y2 =
+  to.y + perpY * offset;
+
+line.setAttribute("x1", x1 + "%");
+line.setAttribute("y1", y1 + "%");
+
+      line.setAttribute("x2", to.x + "%");
+      line.setAttribute("y2", to.y + "%");
 
       line.setAttribute("stroke", color);
-      line.setAttribute("stroke-width", "3");
+      line.setAttribute("stroke-width", "4");
 
       line.style.cursor = "pointer";
+      line.style.pointerEvents = "auto";
 
-line.addEventListener("click", () => {
+      line.addEventListener("click", () => {
 
-  // reset semua garis
-  svg.querySelectorAll("line").forEach(l => {
-    l.setAttribute("stroke-width", "3");
-  });
+        svg.querySelectorAll("line")
+        .forEach(l => {
+          l.setAttribute("stroke-width", "4");
+        });
 
-  // garis aktif
-  line.setAttribute("stroke-width", "6");
+        line.setAttribute("stroke-width", "7");
 
-  selectedConnection = {
-    fromId: from.id,
-    toId: conn.to
-  };
-});
+        selectedConnection = {
+          fromId: from.id,
+          toId: conn.to
+        };
+      });
 
       svg.appendChild(line);
 
-      // label
+      // TEXT
       const text = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
       );
 
-      const midX = (x1 + x2) / 2;
-      const midY = (y1 + y2) / 2;
+     const midX = (x1 + x2) / 2;
+const midY = (y1 + y2) / 2;
 
       text.setAttribute("x", midX + "%");
       text.setAttribute("y", midY + "%");
 
-      text.textContent = `${conn.distance || 0} km`;
-
       text.setAttribute("fill", color);
-      text.setAttribute("font-size", "12");
+      text.setAttribute("font-size", "14");
       text.setAttribute("font-weight", "bold");
+
+      text.textContent =
+        `${conn.distance} km`;
 
       svg.appendChild(text);
     });
@@ -314,7 +423,7 @@ let scale = 1;
 let translateX = 0;
 let translateY = 0;
 
-let isDragging = false;
+// let isDragging = false;
 let startX = 0;
 let startY = 0;
 
@@ -383,19 +492,30 @@ window.addEventListener("keydown", (e) => {
 // =====================
 // DRAG / PAN
 // =====================
+let isDragging = false;
+
 container.addEventListener("mousedown", (e) => {
+
+  // jangan drag kalau klik pin
+  if (e.target.closest(".pin")) return;
+
   isDragging = true;
+
   startX = e.clientX;
   startY = e.clientY;
+
   container.style.cursor = "grabbing";
 });
 
 window.addEventListener("mouseup", () => {
+
   isDragging = false;
+
   container.style.cursor = "grab";
 });
 
 window.addEventListener("mousemove", (e) => {
+
   if (!isDragging) return;
 
   const dx = e.clientX - startX;
@@ -421,8 +541,6 @@ function clampPan() {
 }
 
 function updateTransform() {
-  clampPan();
-
   content.style.transform =
     `translate(${translateX}px, ${translateY}px) scale(${scale})`;
 }

@@ -13,43 +13,33 @@
 
 <div id="map-container">
 
-  <div id="route-panel">
+ <div id="route-panel">
 
-  <h2>Temukan Rute</h2>
+  <div class="title">Find Route</div>
 
-  <input
-    type="text"
-    id="fromInput"
-    placeholder="Dari pinpoint"
-  >
+  <div class="input-box">
+    <span>📍</span>
+    <input id="fromInput" placeholder="Pontianak">
+  </div>
 
-  <input
-    type="text"
-    id="toInput"
-    placeholder="Ke pinpoint"
-  >
+  <div class="input-box">
+    <span>📍</span>
+    <input id="toInput" placeholder="Bali">
+  </div>
 
-  <select id="sortType">
-    <option value="fastest">
-      Tercepat
-    </option>
+  <button id="searchRouteBtn">Search</button>
 
-    <option value="cheapest">
-      Termurah
-    </option>
-  </select>
-
-  <button
-    id="searchRouteBtn"
-    disabled
-  >
-    Cari Rute
-  </button>
+  <div class="sort">
+    <span>Sort By</span>
+    <div>
+      <button class="active">Fastest</button>
+      <button>Cheapest</button>
+    </div>
+  </div>
 
   <div id="routeResults"></div>
 
 </div>
-
   <!-- PETA -->
   <div id="map-content">
 

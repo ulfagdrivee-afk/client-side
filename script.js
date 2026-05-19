@@ -19,6 +19,7 @@ let popupY = 0;
 let tempX = 0;
 let tempY = 0;
 
+// localStorage.clear();
 let sortMode = "fastest";
 
 const transportData = {
@@ -115,16 +116,7 @@ input.addEventListener("keypress", (e) => {
 cancelBtn.onclick = () => {
   popup.classList.add("hidden");
 };
-/* ======================
-   SAVE PIN
-====================== */
 
-input.addEventListener("keypress", (e) => {
-
-  if (e.key === "Enter") {
-    savePin();
-  }
-});
 
 /* CLOSE */
 cancelBtn.onclick = () => {
@@ -150,14 +142,20 @@ function savePin() {
   popup.classList.add("hidden");
 }
 
-document.querySelectorAll(".sort button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".sort button")
-      .forEach(b => b.classList.remove("active"));
+const sortButtons = document.querySelectorAll(".sort-bar button");
 
+sortButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+
+    sortButtons.forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
 
-    sortMode = btn.textContent.toLowerCase();
+    sortMode = btn.getAttribute("data-sort") || "fastest";
+
+    console.log("SORT MODE CHANGED:", sortMode);
+
+    // 🔥 WAJIB: paksa trigger ulang search
+    searchRouteBtn.click();
   });
 });
 
@@ -264,31 +262,33 @@ mapContainer.addEventListener("click", (e) => {
   connectPopup.classList.remove("hidden");
 
   connectSaveBtn.onclick = () => {
-    const distance = parseFloat(distanceInput.value) || 0;
-    const type = transportSelect.value;
+
+  const distance = parseFloat(distanceInput.value) || 0;
+  const type = transportSelect.value;
 
   fromPin.connections.push({
-  from: fromPin.id,
-  to: toPin.id,
-  distance,
-  type
-});
+    from: fromPin.id,
+    to: toPin.id,
+    distance,
+    type
+  });
 
-toPin.connections.push({
-  from: toPin.id,
-  to: fromPin.id,
-  distance,
-  type
-});
+  toPin.connections.push({
+    from: toPin.id,
+    to: fromPin.id,
+    distance,
+    type
+  });
 
+  console.log(pins);
 
-    save();
+  save();
 
-    connectPopup.classList.add("hidden");
-    connectFrom = null;
+  connectPopup.classList.add("hidden");
+  connectFrom = null;
 
-    drawLines();
-  };
+  drawLines();
+};
 
   connectCancelBtn.onclick = () => {
     connectPopup.classList.add("hidden");
@@ -373,8 +373,8 @@ const y2 =
 line.setAttribute("x1", x1 + "%");
 line.setAttribute("y1", y1 + "%");
 
-      line.setAttribute("x2", to.x + "%");
-      line.setAttribute("y2", to.y + "%");
+      line.setAttribute("x2", x2 + "%");
+line.setAttribute("y2", y2 + "%");
 
       line.setAttribute("stroke", color);
       line.setAttribute("stroke-width", "4");
@@ -507,50 +507,49 @@ const sortType =
 ========================= */
 
 function findAllRoutes(startId, endId, maxRoutes = 10) {
-  const results = [];
 
-  function dfs(current, visited, path, totalDistance, totalType) {
-    if (results.length >= maxRoutes) return;
+  const routes = [];
 
-    if (current == endId) {
-      results.push({
-        path: [...path],
-        distance: totalDistance
+  function dfs(currentId, visited, path) {
+
+    // kalau sudah cukup
+    if (routes.length >= maxRoutes) return;
+
+    // sampai tujuan
+    if (currentId == endId) {
+
+      routes.push({
+        path: [...path]
       });
+
       return;
     }
 
-    const pin = pins.find(p => p.id == current);
-    if (!pin) return;
+    const currentPin =
+      pins.find(p => p.id == currentId);
 
-    for (let conn of pin.connections || []) {
-      if (visited.includes(conn.to)) continue;
+    if (!currentPin) return;
 
-      visited.push(conn.to);
-     path.push({
-  from: current,
+    for (const conn of currentPin.connections || []) {
+
+      // hindari loop
+      if (visited.includes(conn.to)) {
+        continue;
+      }
+
+    dfs(conn.to, [...visited, conn.to], [...path, {
+  from: currentId,
   to: conn.to,
-  distance: conn.distance,
+  distance: Number(conn.distance),
   type: conn.type
-});
-
-      dfs(
-        conn.to,
-        visited,
-        path,
-        totalDistance + conn.distance
-      );
-
-      visited.pop();
-      path.pop();
+}]);
     }
   }
 
-  dfs(startId, [startId], [], 0);
+  dfs(startId, [startId], []);
 
-  return results;
+  return routes;
 }
-
 
 
 
@@ -585,8 +584,11 @@ searchRouteBtn.addEventListener("click", () => {
 
   routeResults.innerHTML = "";
 
-  const fromName = fromInput.value.trim().toLowerCase();
-  const toName = toInput.value.trim().toLowerCase();
+  const fromName =
+    fromInput.value.trim().toLowerCase();
+
+  const toName =
+    toInput.value.trim().toLowerCase();
 
   const fromPin = pins.find(
     p => p.name.toLowerCase() === fromName
@@ -598,10 +600,38 @@ searchRouteBtn.addEventListener("click", () => {
 
   console.log(fromPin, toPin);
 
-  if (!fromPin || !toPin) return;
+  if (!fromPin || !toPin) {
+    routeResults.innerHTML = `
+      <div class="route-card">
+        Pin tidak ditemukan
+      </div>
+    `;
+    return;
+  }
 
-  const routes = findAllRoutes(fromPin.id, toPin.id, 10);
+  // ======================
+  // CARI SEMUA RUTE
+  // ======================
+  const routes =
+    findAllRoutes(fromPin.id, toPin.id, 10);
 
+  // ======================
+  // TIDAK ADA RUTE
+  // ======================
+  if (routes.length === 0) {
+
+    routeResults.innerHTML = `
+      <div class="route-card">
+        Rute tidak ditemukan
+      </div>
+    `;
+
+    return;
+  }
+
+  // ======================
+  // HITUNG WAKTU + BIAYA
+  // ======================
   const enriched = routes.map(r => {
 
     let totalTime = 0;
@@ -609,17 +639,19 @@ searchRouteBtn.addEventListener("click", () => {
 
     r.path.forEach(step => {
 
-      const speed =
-        step.type === "plane" ? 800 :
-        step.type === "train" ? 120 : 60;
 
-      const cost =
-        step.distance *
-        (step.type === "plane" ? 5 :
-         step.type === "train" ? 2 : 1);
 
-      totalTime += (step.distance / speed) * 60;
-      totalCost += cost;
+const transportInfo = {
+  plane: { speed: 900, costPerKm: 8000 },
+  train: { speed: 120, costPerKm: 2000 },
+  bus: { speed: 60, costPerKm: 500 }
+};
+
+const info = transportInfo[step.type];
+
+totalTime += (step.distance / info.speed) * 60;
+totalCost += step.distance * info.costPerKm;
+  
     });
 
     return {
@@ -628,25 +660,46 @@ searchRouteBtn.addEventListener("click", () => {
       cost: totalCost
     };
   });
-
-  enriched.sort((a, b) => {
-    return sortMode === "cheapest"
-      ? a.cost - b.cost
-      : a.time - b.time;
-  });
-
-  const top10 = enriched.slice(0, 10);
-
-  if (top10.length === 0) {
-    routeResults.innerHTML = "Rute tidak ditemukan";
-    return;
+console.log("ENRICHED ROUTES:");
+console.table(enriched.map(r => ({
+  time: r.time,
+  cost: r.cost
+})));
+  // ======================
+  // SORT
+  // ======================
+enriched.sort((a, b) => {
+  if (sortMode === "cheapest") {
+    if (a.cost === b.cost) {
+      return a.time - b.time;
+    }
+    return a.cost - b.cost;
   }
 
+  // FASTEST
+  if (a.time === b.time) {
+    return a.cost - b.cost;
+  }
+
+  return a.time - b.time;
+});
+  // ======================
+  // AMBIL 10 TERBAIK
+  // ======================
+  const top10 = enriched.slice(0, 10);
+
+  // ======================
+  // RENDER
+  // ======================
   top10.forEach((r, index) => {
 
     const stepsHTML = r.path.map(step => {
-      const from = pins.find(p => p.id == step.from);
-      const to = pins.find(p => p.id == step.to);
+
+      const from =
+        pins.find(p => p.id == step.from);
+
+      const to =
+        pins.find(p => p.id == step.to);
 
       if (!from || !to) return "";
 
@@ -656,7 +709,9 @@ searchRouteBtn.addEventListener("click", () => {
       `;
     }).join("<br>");
 
-    const div = document.createElement("div");
+    const div =
+      document.createElement("div");
+
     div.className = "route-card";
 
     div.innerHTML = `
@@ -665,11 +720,11 @@ searchRouteBtn.addEventListener("click", () => {
       </div>
 
       <div class="route-info">
-        ⏱ Durasi: ${r.time.toFixed(1)} menit
+        ⏱ ${(r.time / 60).toFixed(1)} jam
       </div>
 
       <div class="route-info">
-        💰 Biaya: Rp ${r.cost.toFixed(0)}
+        💰 Rp${r.cost.toLocaleString("id-ID")}
       </div>
 
       <div class="route-step">
@@ -681,6 +736,7 @@ searchRouteBtn.addEventListener("click", () => {
   });
 
 });
+
 window.addEventListener("keydown", (e) => {
   // =========================
   // DELETE CONNECTION (1 KEYDOWN SAJA)

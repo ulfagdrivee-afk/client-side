@@ -602,3 +602,35 @@ body {
 .hidden {
   display: none !important;
 }
+
+.legend {
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend .line {
+  width: 25px;
+  height: 4px;
+  display: inline-block;
+  border-radius: 3px;
+}
+
+.legend .train {
+  background: #33E339;
+}
+
+.legend .bus {
+  background: #A83BE8;
+}
+
+.legend .plane {
+  background: #000000;
+}

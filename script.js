@@ -437,14 +437,17 @@ let scale = 1;
 let translateX = 0;
 let translateY = 0;
 
-// let isDragging = false;
+let isDragging = false;
 let startX = 0;
 let startY = 0;
 
-// function updateTransform() {
-//   content.style.transform =
-//     `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-// }
+function updateTransform() {
+
+  content.style.transformOrigin = "0 0";
+
+  content.style.transform =
+    `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+}
 // =====================
 // ZOOM (CTRL + SCROLL)
 // =====================
@@ -469,18 +472,22 @@ container.addEventListener("wheel", (e) => {
   translateY = mouseY - worldY * newScale;
 
   scale = newScale;
-
+  clampPan();
   updateTransform();
 }, { passive: false });
 
 function clampPan() {
+
   const rect = container.getBoundingClientRect();
 
-  const maxX = rect.width * (scale - 1);
-  const maxY = rect.height * (scale - 1);
+  const scaledWidth = rect.width * scale;
+  const scaledHeight = rect.height * scale;
 
-  translateX = Math.min(0, Math.max(translateX, -maxX));
-  translateY = Math.min(0, Math.max(translateY, -maxY));
+  const minX = rect.width - scaledWidth;
+  const minY = rect.height - scaledHeight;
+
+  translateX = Math.min(0, Math.max(translateX, minX));
+  translateY = Math.min(0, Math.max(translateY, minY));
 }
 
 function updateTransform() {
@@ -642,14 +649,31 @@ searchRouteBtn.addEventListener("click", () => {
 
 
 const transportInfo = {
-  plane: { speed: 900, costPerKm: 8000 },
-  train: { speed: 120, costPerKm: 2000 },
-  bus: { speed: 60, costPerKm: 500 }
+  train: {
+    speed: 120,      // km/jam
+    costPerKm: 500,  // Rp/km
+    color: "#33E339"
+  },
+
+  bus: {
+    speed: 80,
+    costPerKm: 100,
+    color: "#A83BE8"
+  },
+
+  plane: {
+    speed: 800,
+    costPerKm: 1000,
+    color: "#000000"
+  }
 };
 
 const info = transportInfo[step.type];
 
+// waktu dalam menit
 totalTime += (step.distance / info.speed) * 60;
+
+// biaya
 totalCost += step.distance * info.costPerKm;
   
     });
@@ -797,6 +821,43 @@ window.addEventListener("keydown", (e) => {
   translateY = mouseY - worldY * newScale;
 
   scale = newScale;
-
+  clampPan();
   updateTransform();
+
+  
+});
+
+/* =====================
+   DRAG / PAN MAP
+===================== */
+
+container.addEventListener("mousedown", (e) => {
+
+  // hanya bisa drag kalau zoom > 1
+  if (scale <= 1) return;
+
+  isDragging = true;
+
+  startX = e.clientX - translateX;
+  startY = e.clientY - translateY;
+
+  container.style.cursor = "grabbing";
+});
+
+window.addEventListener("mousemove", (e) => {
+
+  if (!isDragging) return;
+
+  translateX = e.clientX - startX;
+  translateY = e.clientY - startY;
+
+  clampPan();
+  updateTransform();
+});
+
+window.addEventListener("mouseup", () => {
+
+  isDragging = false;
+
+  container.style.cursor = "grab";
 });

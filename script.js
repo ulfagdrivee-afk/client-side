@@ -13,9 +13,6 @@ const connectCancelBtn = document.getElementById("connectCancelBtn");
 let connectFrom = null;
 let selectedConnection = null;
 
-let popupX = 0;
-let popupY = 0;
-
 let tempX = 0;
 let tempY = 0;
 
@@ -45,20 +42,23 @@ window.onload = () => {
  popup.classList.add("hidden");
 mapContainer.addEventListener("dblclick", (e) => {
 
-  const rect =
-    mapContainer.getBoundingClientRect();
+  const rect = mapContainer.getBoundingClientRect();
 
-  tempX =
-    ((e.clientX - rect.left) / rect.width) * 100;
+  // posisi mouse relatif terhadap container
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
 
-  tempY =
-    ((e.clientY - rect.top) / rect.height) * 100;
+  // konversi ke koordinat map asli       
+  const worldX = (mouseX - translateX) / scale;
+  const worldY = (mouseY - translateY) / scale;
+
+  tempX = (worldX / rect.width) * 100;
+  tempY = (worldY / rect.height) * 100;
 
   popup.classList.remove("hidden");
 
   input.value = "";
 
-  // posisi popup dekat klik
   let popupX = e.clientX + 10;
   let popupY = e.clientY - 20;
 
@@ -66,30 +66,18 @@ mapContainer.addEventListener("dblclick", (e) => {
   const popupHeight = 140;
   const margin = 20;
 
-  // kanan
-  if (
-    popupX + popupWidth >
-    window.innerWidth - margin
-  ) {
-    popupX =
-      window.innerWidth - popupWidth - margin;
+  if (popupX + popupWidth > window.innerWidth - margin) {
+    popupX = window.innerWidth - popupWidth - margin;
   }
 
-  // bawah
-  if (
-    popupY + popupHeight >
-    window.innerHeight - margin
-  ) {
-    popupY =
-      window.innerHeight - popupHeight - margin;
+  if (popupY + popupHeight > window.innerHeight - margin) {
+    popupY = window.innerHeight - popupHeight - margin;
   }
 
-  // kiri
   if (popupX < margin) {
     popupX = margin;
   }
 
-  // atas
   if (popupY < margin) {
     popupY = margin;
   }
@@ -111,13 +99,6 @@ input.addEventListener("keypress", (e) => {
     popup.classList.add("hidden");
   }
 });
-
-/* CLOSE */
-cancelBtn.onclick = () => {
-  popup.classList.add("hidden");
-};
-
-
 /* CLOSE */
 cancelBtn.onclick = () => {
   popup.classList.add("hidden");
@@ -175,27 +156,39 @@ function renderPin(pin) {
 
   div.innerHTML = `
 
-    <div class="pin-icon"></div>
+    <div class="pin-wrapper">
 
-    <div class="pin-label">
+      <!-- BOX ATAS -->
+      <div class="pin-label">
 
-      ${pin.name}
+        <div class="pin-top">
 
-      <div class="pin-actions">
+          <span class="pin-name">
+            ${pin.name}
+          </span>
 
-        <img
-          src="MdiTransitConnectionVariant.svg"
-          class="action-icon"
-          onclick="connectPin(${pin.id})"
-        >
+          <div class="pin-actions">
 
-        <img
-          src="MdiTrashCanOutline.svg"
-          class="action-icon"
-          onclick="deletePin(${pin.id})"
-        >
+            <img
+              src="MdiTransitConnectionVariant.svg"
+              class="action-icon"
+              onclick="connectPin(${pin.id})"
+            >
+
+            <img
+              src="MdiTrashCanOutline.svg"
+              class="action-icon"
+              onclick="deletePin(${pin.id})"
+            >
+
+          </div>
+
+        </div>
 
       </div>
+
+      <!-- GAMBAR PINPOINT -->
+      <div class="pin-icon"></div>
 
     </div>
   `;
@@ -305,18 +298,20 @@ function drawLines() {
 
   const drawn = new Set();
 
+  const mapRect =
+    mapContainer.getBoundingClientRect();
+
   pins.forEach(from => {
 
     if (!Array.isArray(from.connections)) return;
 
     from.connections.forEach(conn => {
 
-     const key =
-  [from.id, conn.to]
-  .sort()
-  .join("-") + "-" + conn.type;
+      const key =
+        [from.id, conn.to]
+        .sort()
+        .join("-") + "-" + conn.type;
 
-      // hanya gambar sekali
       if (drawn.has(key)) return;
 
       drawn.add(key);
@@ -329,96 +324,402 @@ function drawLines() {
       const color =
         transportData[conn.type]?.color || "blue";
 
+      // =========================
+      // HITUNG POSISI ASLI
+      // =========================
+
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+
+      const length =
+        Math.sqrt(dx * dx + dy * dy) || 1;
+
+      let offset = 0;
+      const spacing = 1.5;
+
+      if (conn.type === "train") {
+        offset = -spacing;
+      }
+
+      if (conn.type === "bus") {
+        offset = 0;
+      }
+
+      if (conn.type === "plane") {
+        offset = spacing;
+      }
+
+      const perpX = -dy / length;
+      const perpY = dx / length;
+
+      const x1 =
+        from.x + perpX * offset;
+
+      const y1 =
+        from.y + perpY * offset;
+
+      const x2 =
+        to.x + perpX * offset;
+
+      const y2 =
+        to.y + perpY * offset;
+
+      // =========================
+      // KONVERSI KE PIXEL
+      // =========================
+
+      const x1px =
+        (x1 / 100) * mapRect.width;
+
+      const y1px =
+        (y1 / 100) * mapRect.height;
+
+      const x2px =
+        (x2 / 100) * mapRect.width;
+
+      const y2px =
+        (y2 / 100) * mapRect.height;
+
+      // =========================
       // GARIS
+      // =========================
+
       const line = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "line"
       );
 
-    const dx = to.x - from.x;
-const dy = to.y - from.y;
+      line.setAttribute("x1", x1px);
+      line.setAttribute("y1", y1px);
 
-const length =
-  Math.sqrt(dx * dx + dy * dy) || 1;
-
-let offset = 0;
-
-if (conn.type === "train") {
-  offset = -1.2;
-}
-
-if (conn.type === "bus") {
-  offset = 0;
-}
-
-if (conn.type === "plane") {
-  offset = 1.2;
-}
-
-const perpX = -dy / length;
-const perpY = dx / length;
-
-const x1 =
-  from.x + perpX * offset;
-
-const y1 =
-  from.y + perpY * offset;
-
-const x2 =
-  to.x + perpX * offset;
-
-const y2 =
-  to.y + perpY * offset;
-
-line.setAttribute("x1", x1 + "%");
-line.setAttribute("y1", y1 + "%");
-
-      line.setAttribute("x2", x2 + "%");
-line.setAttribute("y2", y2 + "%");
+      line.setAttribute("x2", x2px);
+      line.setAttribute("y2", y2px);
 
       line.setAttribute("stroke", color);
       line.setAttribute("stroke-width", "4");
 
       line.style.cursor = "pointer";
-      line.style.pointerEvents = "auto";
+
+      // =========================
+      // CLICK SELECT
+      // =========================
 
       line.addEventListener("click", () => {
 
         svg.querySelectorAll("line")
-        .forEach(l => {
-          l.setAttribute("stroke-width", "4");
-        });
+          .forEach(l =>
+            l.setAttribute("stroke-width", "4")
+          );
 
         line.setAttribute("stroke-width", "7");
 
         selectedConnection = {
           fromId: from.id,
-          toId: conn.to
+          toId: conn.to,
+          type: conn.type
         };
       });
 
       svg.appendChild(line);
 
-      // TEXT
+      // =========================
+      // TEXT JARAK
+      // =========================
+
       const text = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "text"
       );
 
-     const midX = (x1 + x2) / 2;
-const midY = (y1 + y2) / 2;
+      // midpoint
+      const mx = (x1px + x2px) / 2;
+      const my = (y1px + y2px) / 2;
 
-      text.setAttribute("x", midX + "%");
-      text.setAttribute("y", midY + "%");
+      // normal vector
+      const vx = x2px - x1px;
+      const vy = y2px - y1px;
 
+      const len =
+        Math.sqrt(vx * vx + vy * vy) || 1;
+
+      const nx = -vy / len;
+      const ny = vx / len;
+
+      // offset text
+      const labelOffset = 30;
+
+      const labelX =
+        mx + nx * labelOffset;
+
+      const labelY =
+        my + ny * labelOffset;
+
+      text.setAttribute("x", labelX);
+      text.setAttribute("y", labelY);
+
+      // rotate text
+      let angle =
+        Math.atan2(vy, vx) * 180 / Math.PI;
+
+      // supaya text tidak terbalik
+      if (angle > 90 || angle < -90) {
+        angle += 180;
+      }
+
+      text.setAttribute(
+        "transform",
+        `rotate(${angle} ${labelX} ${labelY})`
+      );
+
+      // style
       text.setAttribute("fill", color);
-      text.setAttribute("font-size", "14");
+      text.setAttribute("font-size", "12");
       text.setAttribute("font-weight", "bold");
+
+      text.setAttribute("text-anchor", "middle");
+
+      text.setAttribute(
+        "dominant-baseline",
+        "middle"
+      );
+
+      text.style.pointerEvents = "none";
 
       text.textContent =
         `${conn.distance} km`;
-
+      svg.appendChild(line);
       svg.appendChild(text);
+
+    });
+  });
+}function drawLines() {
+
+  svg.innerHTML = "";
+
+  const drawn = new Set();
+
+  const mapRect =
+    mapContainer.getBoundingClientRect();
+
+  pins.forEach(from => {
+
+    if (!Array.isArray(from.connections)) return;
+
+    from.connections.forEach(conn => {
+
+      const key =
+        [from.id, conn.to]
+        .sort()
+        .join("-") + "-" + conn.type;
+
+      if (drawn.has(key)) return;
+
+      drawn.add(key);
+
+      const to =
+        pins.find(p => p.id == conn.to);
+
+      if (!to) return;
+
+      const color =
+        transportData[conn.type]?.color || "blue";
+
+      // =========================
+      // HITUNG POSISI ASLI
+      // =========================
+
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+
+      const length =
+        Math.sqrt(dx * dx + dy * dy) || 1;
+
+      let offset = 0;
+      const spacing = 1.5;
+
+      if (conn.type === "train") {
+        offset = -spacing;
+      }
+
+      if (conn.type === "bus") {
+        offset = 0;
+      }
+
+      if (conn.type === "plane") {
+        offset = spacing;
+      }
+
+      const perpX = -dy / length;
+      const perpY = dx / length;
+
+      const x1 =
+        from.x + perpX * offset;
+
+      const y1 =
+        from.y + perpY * offset;
+
+      const x2 =
+        to.x + perpX * offset;
+
+      const y2 =
+        to.y + perpY * offset;
+
+      // =========================
+      // KONVERSI KE PIXEL
+      // =========================
+
+      const x1px =
+        (x1 / 100) * mapRect.width;
+
+      const y1px =
+        (y1 / 100) * mapRect.height;
+
+      const x2px =
+        (x2 / 100) * mapRect.width;
+
+      const y2px =
+        (y2 / 100) * mapRect.height;
+
+      // =========================
+      // GARIS
+      // =========================
+
+      const line = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+      );
+
+      line.setAttribute("x1", x1px);
+      line.setAttribute("y1", y1px);
+
+      line.setAttribute("x2", x2px);
+      line.setAttribute("y2", y2px);
+
+      line.setAttribute("stroke", color);
+      line.setAttribute("stroke-width", "4");
+      line.setAttribute("stroke-linecap", "round");
+
+      line.style.cursor = "pointer";
+
+      // =========================
+      // CLICK SELECT
+      // =========================
+
+      line.addEventListener("click", () => {
+
+        svg.querySelectorAll("line")
+          .forEach(l =>
+            l.setAttribute("stroke-width", "4")
+          );
+
+        line.setAttribute("stroke-width", "7");
+
+        selectedConnection = {
+          fromId: from.id,
+          toId: conn.to,
+          type: conn.type
+        };
+      });
+
+      svg.appendChild(line);
+
+// =========================
+// TEXT JARAK
+// =========================
+
+const mx = (x1px + x2px) / 2;
+const my = (y1px + y2px) / 2;
+
+const vx = x2px - x1px;
+const vy = y2px - y1px;
+
+const len = Math.sqrt(vx * vx + vy * vy) || 1;
+
+// sudut garis
+let angle =
+  Math.atan2(vy, vx) * 180 / Math.PI;
+
+// supaya text tidak terbalik
+if (angle > 90 || angle < -90) {
+  angle += 180;
+}
+
+// =========================
+// OFFSET MENYAMPING
+// =========================
+
+let sideOffset = 0;
+
+// hijau kiri
+if (conn.type === "train") {
+  sideOffset = -40;
+}
+
+// ungu tengah
+if (conn.type === "bus") {
+  sideOffset = 0;
+}
+
+// hitam kanan
+if (conn.type === "plane") {
+  sideOffset = 40;
+}
+
+// posisi mengikuti arah garis
+const tx = mx + (vx / len) * sideOffset;
+const ty = my + (vy / len) * sideOffset;
+
+// sedikit naik di atas garis
+const nx = -vy / len;
+const ny = vx / len;
+
+const finalX = tx + nx * -18;
+const finalY = ty + ny * -18;
+
+// =========================
+// BUAT TEXT
+// =========================
+
+const text = document.createElementNS(
+  "http://www.w3.org/2000/svg",
+  "text"
+);
+
+text.setAttribute("x", finalX);
+text.setAttribute("y", finalY);
+
+text.setAttribute(
+  "transform",
+  `rotate(${angle} ${finalX} ${finalY})`
+);
+
+text.setAttribute("fill", color);
+
+text.setAttribute("font-size", "14");
+
+text.setAttribute("font-weight", "bold");
+
+text.setAttribute("text-anchor", "middle");
+
+text.setAttribute(
+  "dominant-baseline",
+  "middle"
+);
+
+// outline putih biar jelas
+text.setAttribute("paint-order", "stroke");
+
+text.setAttribute("stroke", "white");
+
+text.setAttribute("stroke-width", "4");
+
+text.setAttribute("stroke-linejoin", "round");
+
+text.style.pointerEvents = "none";
+
+text.textContent = conn.distance;
+
+svg.appendChild(text);
     });
   });
 }
@@ -440,14 +741,6 @@ let translateY = 0;
 let isDragging = false;
 let startX = 0;
 let startY = 0;
-
-function updateTransform() {
-
-  content.style.transformOrigin = "0 0";
-
-  content.style.transform =
-    `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-}
 // =====================
 // ZOOM (CTRL + SCROLL)
 // =====================
@@ -491,8 +784,11 @@ function clampPan() {
 }
 
 function updateTransform() {
+
   content.style.transform =
     `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+
+  drawLines();
 }
 
 updateTransform();
@@ -505,9 +801,6 @@ const searchRouteBtn =
 
 const routeResults =
   document.getElementById("routeResults");
-
-const sortType =
-  document.getElementById("sortType");
 
 /* =========================
    VALIDASI INPUT
@@ -765,35 +1058,30 @@ window.addEventListener("keydown", (e) => {
   // =========================
   // DELETE CONNECTION (1 KEYDOWN SAJA)
   // =========================
-  if (e.key === "Delete" || e.key === "Backspace") {
-    if (!selectedConnection) return;
+if (e.key === "Delete" || e.key === "Backspace") {
+  if (!selectedConnection) return;
 
-    const fromPin = pins.find(
-      p => p.id == selectedConnection.fromId
-    );
+  const { fromId, toId, type } = selectedConnection;
 
-    const toPin = pins.find(
-      p => p.id == selectedConnection.toId
-    );
+  const fromPin = pins.find(p => p.id == fromId);
+  const toPin = pins.find(p => p.id == toId);
 
-    if (!fromPin || !toPin) return;
+  if (!fromPin || !toPin) return;
 
-    fromPin.connections =
-      (fromPin.connections || []).filter(
-        conn => conn.to != selectedConnection.toId
-      );
+  // HAPUS HANYA 1 GARIS YANG MATCH SEMUA KRITERIA
+  fromPin.connections = (fromPin.connections || []).filter(conn =>
+    !(conn.to == toId && conn.type == type)
+  );
 
-    toPin.connections =
-      (toPin.connections || []).filter(
-        conn => conn.to != selectedConnection.fromId
-      );
+  toPin.connections = (toPin.connections || []).filter(conn =>
+    !(conn.to == fromId && conn.type == type)
+  );
 
-    selectedConnection = null;
+  selectedConnection = null;
 
-    save();
-    drawLines();
-  }
-
+  save();
+  drawLines();
+}
   // =========================
   // ZOOM KEYBOARD
   // =========================

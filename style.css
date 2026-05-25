@@ -6,7 +6,6 @@
   padding: 0;
   box-sizing: border-box;
 }
-
 html,
 body {
   width: 100%;
@@ -14,7 +13,6 @@ body {
   overflow: hidden;
   font-family: Arial, sans-serif;
 }
-
 /* =========================
    MAP CONTAINER
 ========================= */
@@ -26,7 +24,6 @@ body {
   background: #000;
   cursor: grab;
 }
-
 /* =========================
    MAP CONTENT
 ========================= */
@@ -38,35 +35,27 @@ body {
   transform-origin: 0 0;
   will-change: transform;
 }
-
 /* =========================
    MAP IMAGE
 ========================= */
 #map {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   object-fit: cover;
-
   pointer-events: none;
   user-select: none;
 }
-
 /* =========================
    LINE SVG
 ========================= */
 #line-layer {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   z-index: 2;
-
   overflow: visible;
 }
 
@@ -79,12 +68,6 @@ body {
   stroke-width: 5;
 }
 
-.line-label {
-  font-size: 12px;
-  font-weight: bold;
-  fill: #111;
-  user-select: none;
-}
 
 /* =========================
    PIN
@@ -95,77 +78,59 @@ body {
   z-index: 5;
   user-select: none;
 }
+.pin-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
 
 /* PIN ICON */
 .pin-icon {
-  width: 70px;
-  height: 70px;
-
-  background: #ff0000;
-
-  border-radius: 50% 50% 50% 0;
-
-  transform: rotate(-45deg);
-
-  position: relative;
-
-  box-shadow:
-    0 6px 15px rgba(0,0,0,0.25);
+  width: 35px;
+  height: 35px;
+  background-image: url("MaterialSymbolsLocationOn.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
 }
 
-/* LUBANG TENGAH */
-.pin-icon::after {
-  content: "";
-
-  position: absolute;
-
-  width: 26px;
-  height: 26px;
-
-  top: 22px;
-  left: 22px;
-
-  border-radius: 50%;
-
-  background: #b7d9ef;
-}
 
 /* LABEL */
 .pin-label {
-  margin-top: 10px;
-
-  min-width: 120px;
-
   background: white;
-
-  padding: 10px;
-
+  padding: 8px 12px;
   border-radius: 12px;
-
-  text-align: center;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  box-shadow:
-    0 3px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+   margin-bottom: 2px;
 }
+.pin-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* NAMA */
+.pin-name {
+  font-size: 13px;
+  font-weight: bold;
+  color: #111;
+}
+
 
 /* ACTIONS */
 .pin-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-
-  margin-top: 8px;
+   display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .action-icon {
   width: 18px;
   height: 18px;
-
   cursor: pointer;
-
   transition: 0.2s;
 }
 
@@ -178,22 +143,13 @@ body {
 ========================= */
 #popup {
   position: fixed;
-
   width: 260px;
-
   background: #f5f5f5;
-
   border: 5px solid black;
-
   border-radius: 18px;
-
   padding: 14px;
-
   z-index: 99999;
-
-  box-shadow:
-    0 8px 20px rgba(0,0,0,0.25);
-
+  box-shadow:0 8px 20px rgba(0,0,0,0.25);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -217,29 +173,20 @@ body {
 .popup-close {
   background: transparent;
   border: none;
-
   color: red;
-
   font-size: 24px;
   line-height: 1;
-
   cursor: pointer;
 }
 
 /* INPUT */
 #locationName {
   width: 100%;
-
   padding: 10px 14px;
-
   border-radius: 14px;
-
   border: 3px solid #444;
-
   outline: none;
-
   font-size: 14px;
-
   background: white;
 }
 
@@ -252,24 +199,15 @@ body {
 ========================= */
 #connectPopup {
   position: fixed;
-
   top: 50%;
   left: 50%;
-
   transform: translate(-50%, -50%);
-
   width: 280px;
-
   background: white;
-
   padding: 18px;
-
   border-radius: 16px;
-
   z-index: 99999;
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.25);
+  box-shadow:  0 10px 30px rgba(0,0,0,0.25);
 }
 
 #connectPopup h4 {
@@ -280,31 +218,20 @@ body {
 #connectPopup input,
 #connectPopup select {
   width: 100%;
-
   margin-top: 10px;
-
   padding: 10px;
-
   border-radius: 10px;
-
   border: 1px solid #ccc;
-
   outline: none;
 }
 
 #connectPopup button {
   width: 100%;
-
   margin-top: 12px;
-
   padding: 10px;
-
   border: none;
-
   border-radius: 10px;
-
   cursor: pointer;
-
   font-weight: bold;
 }
 
@@ -326,20 +253,13 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-
   width: 250px;
   height: 100vh;
-
   background: #efefef;
-
   border-right: 2px solid #222;
-
   padding: 18px;
-
   z-index: 99999;
-
   overflow-y: auto;
-
   font-family: Arial, sans-serif;
 }
 
@@ -356,15 +276,10 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-
   background: white;
-
   border: 2px solid #666;
-
   border-radius: 12px;
-
   padding: 8px 12px;
-
   margin-bottom: 10px;
 }
 
@@ -374,40 +289,11 @@ body {
 
 .route-input input {
   width: 100%;
-
   border: none;
   outline: none;
-
   background: transparent;
-
   font-size: 14px;
 }
-
-/* BUTTON */
-#searchRouteBtn {
-  width: 100%;
-
-  border: none;
-
-  margin-top: 8px;
-
-  padding: 10px;
-
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      90deg,
-      #a335ff,
-      #d53cff
-    );
-
-  color: white;
-
-  font-size: 15px;
-  cursor: pointer;
-}
-
 #searchRouteBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -416,11 +302,8 @@ body {
 /* SORT */
 .sort-bar {
   margin-top: 14px;
-
   padding-top: 10px;
-
   border-top: 2px solid #444;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -430,20 +313,11 @@ body {
   font-size: 12px;
   color: #333;
 }
-
-.sort-buttons {
-  display: flex;
-  gap: 8px;
-}
-
 .sort-buttons button {
   border: none;
   background: transparent;
-
   font-size: 12px;
-
   cursor: pointer;
-
   color: #444;
 }
 
@@ -457,48 +331,12 @@ body {
 #routeResults {
   margin-top: 14px;
 }
-
-/* CARD */
-.route-card {
-  background: #dcdce2;
-
-  padding: 12px;
-
-  margin-bottom: 14px;
-}
-
-/* TITLE */
-.route-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  font-size: 13px;
-  font-weight: bold;
-
-  margin-bottom: 8px;
-}
-
-/* DURATION */
-.route-duration {
-  color: #888;
-  font-size: 12px;
-}
-
 /* STEPS */
 .route-steps {
   font-size: 11px;
   color: #666;
-
   line-height: 1.5;
-
   margin-bottom: 12px;
-}
-
-/* COST */
-.route-cost {
-  font-size: 15px;
-  font-weight: bold;
 }
 
 /* TITLE */
@@ -507,24 +345,9 @@ body {
   font-weight: bold;
   margin-bottom: 18px;
 }
-
-/* INPUT BOX */
-.input-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  background: #f2f2f2;
-  padding: 12px 14px;
-  border-radius: 14px;
-
-  margin-bottom: 10px;
-}
-
 .input-box span {
   font-size: 18px;
 }
-
 .input-box input {
   border: none;
   outline: none;
@@ -538,13 +361,10 @@ body {
   width: 100%;
   padding: 12px;
   border: none;
-
   background: #8b3dff;
   color: white;
-
   font-weight: bold;
   border-radius: 14px;
-
   margin-top: 10px;
   cursor: pointer;
 }
@@ -554,7 +374,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   margin-top: 12px;
   font-size: 13px;
 }
@@ -601,36 +420,4 @@ body {
 ========================= */
 .hidden {
   display: none !important;
-}
-
-.legend {
-  display: flex;
-  gap: 15px;
-  padding: 10px;
-  font-size: 14px;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.legend .line {
-  width: 25px;
-  height: 4px;
-  display: inline-block;
-  border-radius: 3px;
-}
-
-.legend .train {
-  background: #33E339;
-}
-
-.legend .bus {
-  background: #A83BE8;
-}
-
-.legend .plane {
-  background: #000000;
 }

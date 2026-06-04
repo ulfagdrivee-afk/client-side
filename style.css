@@ -1,423 +1,391 @@
-/* =========================
-   RESET
-========================= */
+/* ==========================================================================
+   RESET & BASE STYLES
+   ========================================================================== */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
-html,
-body {
+
+body, html {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  background-color: #ffffff;
 }
-/* =========================
-   MAP CONTAINER
-========================= */
-#map-container {
+
+/* Menggunakan Flexbox agar Sidebar dan Peta Berdampingan Secara Sempurna */
+.app-container {
+  display: flex;
   width: 100vw;
   height: 100vh;
   position: relative;
-  overflow: hidden;
-  background: #000;
-  cursor: grab;
-}
-/* =========================
-   MAP CONTENT
-========================= */
-#map-content {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-/* =========================
-   MAP IMAGE
-========================= */
-#map {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-  user-select: none;
-}
-/* =========================
-   LINE SVG
-========================= */
-#line-layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  overflow: visible;
 }
 
-#line-layer line {
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-#line-layer line:hover {
-  stroke-width: 5;
-}
-
-
-/* =========================
-   PIN
-========================= */
-.pin {
-  position: absolute;
-  transform: translate(-50%, -100%);
-  z-index: 5;
-  user-select: none;
-}
-.pin-wrapper {
+/* ==========================================================================
+   SIDEBAR STYLE (DI SAMPING PETA, TIDAK MENUTUPI)
+   ========================================================================== */
+.sidebar {
+  width: 360px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 2px solid #222222;
+  padding: 40px 24px;
   display: flex;
-  align-items: center;
   flex-direction: column;
+  gap: 20px;
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  z-index: 10;
+  flex-shrink: 0; /* Mencegah sidebar menyusut */
 }
 
-
-/* PIN ICON */
-.pin-icon {
-  width: 35px;
-  height: 35px;
-  background-image: url("MaterialSymbolsLocationOn.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  flex-shrink: 0;
+.sidebar h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: -0.5px;
+  margin-bottom: 5px;
 }
 
-
-/* LABEL */
-.pin-label {
-  background: white;
-  padding: 8px 12px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-   margin-bottom: 2px;
-}
-.pin-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-/* NAMA */
-.pin-name {
-  font-size: 13px;
-  font-weight: bold;
-  color: #111;
-}
-
-
-/* ACTIONS */
-.pin-actions {
-   display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-icon {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.action-icon:hover {
-  transform: scale(1.15);
-}
-
-/* =========================
-   POPUP
-========================= */
-#popup {
-  position: fixed;
-  width: 260px;
-  background: #f5f5f5;
-  border: 5px solid black;
-  border-radius: 18px;
-  padding: 14px;
-  z-index: 99999;
-  box-shadow:0 8px 20px rgba(0,0,0,0.25);
+.input-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* HEADER */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding: 14px 14px 14px 40px;
+  border: 1.5px solid #737373;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222222;
+  background-color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper input:focus {
+  border-color: #A83BE8;
+}
+
+#searchRouteBtn {
+  width: 100%;
+  background: #A83BE8;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+#searchRouteBtn:active {
+  transform: scale(0.98);
+}
+
+#searchRouteBtn:disabled {
+  background: #e2d4f0;
+  color: #bfa8db;
+  cursor: not-allowed;
+}
+
+.sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 15px;
+  margin-top: 5px;
+}
+
+.sort-label {
+  color: #222222;
+  font-weight: 500;
+}
+
+.sort-options {
+  display: flex;
+  gap: 15px;
+}
+
+.sort-btn {
+  background: none;
+  border: none;
+  color: #737373;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 2px 0;
+  position: relative;
+}
+
+.sort-btn.active {
+  color: #A83BE8;
+}
+
+.sort-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #A83BE8;
+  border-radius: 2px;
+}
+
+.results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.route-card {
+  background: #EAEAEF;
+  border-radius: 0px; 
+  padding: 16px;
+  border-left: 4px solid #A83BE8;
+}
+
+.route-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: #222222;
+  margin-bottom: 8px;
+}
+
+.route-card-meta {
+  font-size: 13px;
+  color: #555555;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.route-steps {
+  font-size: 13px;
+  color: #444444;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   AREA MAP UTAMA (WARNA BIRU DIHAPUS, BERSIH, DAN LUAS)
+   ========================================================================== */
+#map-container {
+  flex: 1; 
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #ffffff; /* Latar belakang diganti putih bersih */
+  cursor: grab;
+}
+
+#map-container:active {
+  cursor: grabbing;
+}
+
+#map-content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+}
+
+.map-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  display: block;
+  user-select: none;
+}
+
+/* Pastikan SVG berada di atas elemen lain */
+#line-layer {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; /* PENTING: Agar klik tembus ke elemen di bawahnya */
+  z-index: 10;
+}
+
+/* Tambahkan ini agar teks angka lebih menonjol */
+text {
+  cursor: pointer;
+  user-select: none;
+  font-family: sans-serif;
+  pointer-events: auto;
+}
+
+/* ==========================================================================
+   PINPOINT & LABEL STYLE
+   ========================================================================== */
+
+/* Pin tetap terlihat jelas */
+.pin {
+  position: absolute;
+  z-index: 20; /* Lebih tinggi dari SVG */
+  pointer-events: auto;
+}
+
+.pin-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.pin-label {
+  background: white;
+  border: 2.5px solid #000000;
+  border-radius: 10px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  margin-bottom: 6px;
+  white-space: nowrap;
+}
+
+.pin-name {
+  font-weight: 700;
+  font-size: 15px;
+  color: #000000;
+}
+
+.pin-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-left: 1.5px solid #e5e5e5;
+  padding-left: 8px;
+}
+
+.action-btn {
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: transform 0.1s;
+}
+
+.action-btn:hover {
+  transform: scale(1.15);
+}
+
+.pin-icon {
+  width: 36px;
+  height: 36px;
+  background: #ff0000;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: -2px 4px 8px rgba(0,0,0,0.25);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.pin-icon::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: white;
+  position: absolute;
+  border-radius: 50%;
+  top: 12px;
+  left: 12px;
+}
+
+.connecting-glow .pin-icon {
+  background: #3b82f6 !important;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+  70% { box-shadow: 0 0 0 14px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+/* ==========================================================================
+   MODAL & POPUP DIALOG GLOBAL
+   ========================================================================== */
+.modal-popup, .dialog-card {
+  position: fixed;
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 16px;
+  padding: 20px;
+  z-index: 100;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  width: 280px;
+}
+
+.hidden {
+  display: none !important;
+}
+
 .popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
 }
 
-/* TITLE */
-.popup-title {
+.popup-header h3 {
   font-size: 16px;
-  font-weight: bold;
-  color: #111;
+  font-weight: 700;
 }
 
-/* CLOSE BUTTON */
-.popup-close {
-  background: transparent;
+.close-x {
+  background: none;
   border: none;
-  color: red;
-  font-size: 24px;
+  font-size: 20px;
+  color: #ef4444;
+  cursor: pointer;
   line-height: 1;
-  cursor: pointer;
 }
 
-/* INPUT */
-#locationName {
+.modal-popup input, .dialog-card input, .dialog-card select {
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 3px solid #444;
-  outline: none;
-  font-size: 14px;
-  background: white;
-}
-
-#locationName:focus {
-  border-color: #2563eb;
-}
-
-/* =========================
-   CONNECT POPUP
-========================= */
-#connectPopup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 280px;
-  background: white;
-  padding: 18px;
-  border-radius: 16px;
-  z-index: 99999;
-  box-shadow:  0 10px 30px rgba(0,0,0,0.25);
-}
-
-#connectPopup h4 {
-  margin-bottom: 12px;
-  font-size: 18px;
-}
-
-#connectPopup input,
-#connectPopup select {
-  width: 100%;
-  margin-top: 10px;
   padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  outline: none;
-}
-
-#connectPopup button {
-  width: 100%;
-  margin-top: 12px;
-  padding: 10px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-#connectSaveBtn {
-  background: #2563eb;
-  color: white;
-}
-
-#connectCancelBtn {
-  background: #ef4444;
-  color: white;
-}
-
-/* =========================
-   ROUTE PANEL
-========================= */
-
-#route-panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 250px;
-  height: 100vh;
-  background: #efefef;
-  border-right: 2px solid #222;
-  padding: 18px;
-  z-index: 99999;
-  overflow-y: auto;
-  font-family: Arial, sans-serif;
-}
-
-/* TITLE */
-.route-header h1 {
-  font-size: 28px;
-  font-weight: 900;
-  margin-bottom: 18px;
-  color: #000;
-}
-
-/* INPUT */
-.route-input {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: white;
-  border: 2px solid #666;
-  border-radius: 12px;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-}
-
-.route-icon {
-  font-size: 15px;
-}
-
-.route-input input {
-  width: 100%;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 14px;
-}
-#searchRouteBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* SORT */
-.sort-bar {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 2px solid #444;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.sort-bar span {
-  font-size: 12px;
-  color: #333;
-}
-.sort-buttons button {
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  cursor: pointer;
-  color: #444;
-}
-
-.sort-buttons .active {
-  color: #a335ff;
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-/* RESULTS */
-#routeResults {
-  margin-top: 14px;
-}
-/* STEPS */
-.route-steps {
-  font-size: 11px;
-  color: #666;
-  line-height: 1.5;
   margin-bottom: 12px;
-}
-
-/* TITLE */
-#route-panel .title {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 18px;
-}
-.input-box span {
-  font-size: 18px;
-}
-.input-box input {
-  border: none;
-  outline: none;
-  background: transparent;
-  width: 100%;
+  border: 2px solid #000000;
+  border-radius: 8px;
   font-size: 14px;
+  outline: none;
 }
 
-/* SEARCH BUTTON */
-#searchRouteBtn {
+.dialog-card button {
   width: 100%;
-  padding: 12px;
-  border: none;
-  background: #8b3dff;
+  background: #000000;
   color: white;
-  font-weight: bold;
-  border-radius: 14px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-/* SORT */
-.sort {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-  font-size: 13px;
-}
-
-.sort button {
   border: none;
-  background: transparent;
-  font-size: 13px;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 700;
   cursor: pointer;
-  margin-left: 8px;
-}
-
-.sort .active {
-  color: #8b3dff;
-  font-weight: bold;
-}
-
-/* RESULT CARD */
-.route-card {
-  margin-top: 15px;
-  background: #f5f5f5;
-  border-radius: 16px;
-  padding: 14px;
-}
-
-.route-title {
-  font-weight: bold;
-  margin-bottom: 6px;
-}
-
-.route-info {
-  font-size: 13px;
-  color: #444;
-}
-
-.route-step {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #666;
-}
-
-/* =========================
-   UTIL
-========================= */
-.hidden {
-  display: none !important;
 }

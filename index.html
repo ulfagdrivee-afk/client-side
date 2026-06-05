@@ -7,38 +7,31 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <div class="app-container">
     <div class="sidebar">
       <h2>Find Route</h2>
-      
-      <div class="input-container">
-        <div class="input-wrapper">
-          <span class="input-icon">📍</span>
-          <input type="text" id="fromInput" placeholder="Asal (cth: surabaya)">
-        </div>
-        <div class="input-wrapper">
-          <span class="input-icon">📍</span>
-          <input type="text" id="toInput" placeholder="Tujuan (cth: kalimantan)">
-        </div>
+      <div class="input-group">
+        <label for="fromInput">📍 Asal:</label>
+        <input type="text" id="fromInput" placeholder="From Pinpoint">
       </div>
-
+      <div class="input-group">
+        <label for="toInput">📍 Tujuan:</label>
+        <input type="text" id="toInput" placeholder="To Pinpoint">
+      </div>
       <button id="searchRouteBtn" disabled>Search</button>
-
+  
       <div class="sort-bar">
-        <span class="sort-label">Sort By</span>
-        <div class="sort-options">
-          <button class="sort-btn active" data-sort="fastest">Fastest</button>
-          <button class="sort-btn" data-sort="cheapest">Cheapest</button>
-        </div>
+        <span>Sort By</span>
+        <button class="active" data-sort="fastest" id="sortFastestBtn">Fastest</button>
+        <button data-sort="cheapest" id="sortCheapestBtn">Cheapest</button>
       </div>
 
-      <div id="routeResults" class="results-container"></div>
+      <div id="routeResults"></div>
     </div>
 
     <div id="map-container">
       <div id="map-content">
-        <img src="indonesia.png" alt="Peta Indonesia" class="map-bg" draggable="false">
+        <img src="indonesia.svg" alt="Peta Indonesia" class="map-bg" draggable="false">
         <svg id="line-layer"></svg>
       </div>
     </div>
@@ -57,13 +50,16 @@
       <h3>Connect</h3>
       <button id="connectCancelBtn" class="close-x">&times;</button>
     </div>
-    <div class="dialog-body">
+    <div class="dialog-body-horizontal">
       <input type="number" id="distanceInput" placeholder="Enter distance (km)" min="1">
       <select id="transportSelect">
-        <option value="train">Kereta (Hijau)</option>
-        <option value="bus">Bus (Ungu)</option>
-        <option value="plane">Pesawat (Hitam)</option>
+        <option value="" disabled selected hidden>Choose mode</option>
+        <option value="train">Kereta</option>
+        <option value="bus">Bus</option>
+        <option value="plane">Pesawat</option>
       </select>
+    </div>
+    <div class="popup-footer">
       <button id="connectSaveBtn">Submit</button>
     </div>
   </div>
